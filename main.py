@@ -10,6 +10,33 @@ from smbprotocol.connection import Connection
 from smbprotocol.session import Session
 import uuid #uuid
 #大部分我就不注释了
+def showIP():
+    packet = """GET /ip HTTP/1.1
+Host: ifconfig.me
+Connection: keep-alive
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Accept-Encoding: gzip, deflate
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5
+
+GET /favicon.ico HTTP/1.1
+Host: ifconfig.me
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Referer: http://ifconfig.me/ip
+Accept-Encoding: gzip, deflate
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
+        sock.connect(("34.117.59.81",80))
+        sock.send(bytes(packet.encode()))
+        un, = struct.unpack("H", sock.recv(2))
+        recv_ = sock.recv(un)
+        return recv_[198:214].decode()
 def connectSMB(IP, username=None, password=None, port=445, encode=None, connectionTimeout=10):
     _SMB_CONNECTIONS = {}
     connection_key = "%s:%s" %(IP, port)
@@ -40,18 +67,18 @@ def randomIP():
 def mode():
     try:
         SMBL = ("""\033[32m
-    +----------------------+
-    |CVE-2020-0796 SMBGhost|
-    +----------------------+
-\033[0m""")
+    +---------------------------------------------------+
+    |CVE-2020-0796 SMBGhost|    |your IP:%s|
+    +---------------------------------------------------+
+\033[0m"""%(showIP()))
         if len(sys.argv) == 1:
             print(SMBL)
-            a = input("\033[34m[+]\033[0mWHETHER TO ACTIVATE AUTOMATIC MODE? y/n/exit>")
+            a = input("\033[34m[+]\033[0mWHETHER TO ACTIVATE AUTOMATIC MODE? (y/n/exit)#")
             if a == "exit":
                 exit(0)
             if a == "n" or a == "N" or a == "NO" or a == "no":
                 while 1:
-                    ip = input("\033[34m[+]\033[0mENTER IP>")
+                    ip = input("\033[34m[+]\033[0mENTER IP#")
                     if ip == "help" or ip == "HELP":
                         print("""
 command:
