@@ -113,8 +113,7 @@ command:
 command:
         local -- scan localnetwork
         help -- help
-        exit -- quit
-        ip -- Scan the specified IP
+        ip address -- Scan the specified IP
 """)
             elif argv_IP == "exit" or argv_IP == "EXIT":
                 exit(0)
