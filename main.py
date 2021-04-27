@@ -9,6 +9,7 @@ from netaddr import IPNetwork #处理IP的，处理像192.168.1.0\24这样的内
 from smbprotocol.connection import Connection
 from smbprotocol.session import Session
 import uuid #uuid
+import re 
 #大部分我就不注释了
 def showIP():
     packet = """GET /ip HTTP/1.1
@@ -34,9 +35,10 @@ Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
         sock.connect(("34.117.59.81",80))
         sock.send(bytes(packet.encode()))
-        un, = struct.unpack("H", sock.recv(2))
+        un, = struct.unpack("!H", sock.recv(2))
         recv_ = sock.recv(un)
-        return recv_[198:214].decode()
+        data = recv_.decode()
+        return re.search(r"\d+\.\d+\.\d+\.\d+",data).group()
 def connectSMB(IP, username=None, password=None, port=445, encode=None, connectionTimeout=10):
     _SMB_CONNECTIONS = {}
     connection_key = "%s:%s" %(IP, port)
@@ -70,7 +72,7 @@ def mode():
     +---------------------------------------------------+
     |CVE-2020-0796 SMBGhost|    |your IP:%s|
     +---------------------------------------------------+
-\033[0m"""%(showIP()))
+\033[0m"""%(showIP())+"\t")
         if len(sys.argv) == 1:
             print(SMBL)
             a = input("\033[34m[+]\033[0mWHETHER TO ACTIVATE AUTOMATIC MODE? (y/n/exit)#")
@@ -130,13 +132,13 @@ def main(IP):
             if scan == 0: #如果打开则运行此行
                 print("\033[32m[+]\033[0m\033[33mIP %s --- PORT 445 OPEN/FILTRTED\033[0m"% IP)
                 with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as smb:
-                    smb.settimeout(10)
+                    smb.settimeout(20)
                     try:
                         smb.connect((IP, port)) 
                     except:
                         smb.close()
                     smb.send(b'\x00\x00\x00\xc0\xfeSMB@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00$\x00\x08\x00\x01\x00\x00\x00\x7f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00x\x00\x00\x00\x02\x00\x00\x00\x02\x02\x10\x02"\x02$\x02\x00\x03\x02\x03\x10\x03\x11\x03\x00\x00\x00\x00\x01\x00&\x00\x00\x00\x00\x00\x01\x00 \x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\n\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00') #发送数据包,sendall函数是发送完整的tcp数据包与send函数类似
-                    b, = struct.unpack("!I", smb.recv(4)) #处理返回回来的4字节的二进制数据包 
+                    b, = struct.unpack("!H", smb.recv(2)) #处理返回回来的2字节的二进制数据包 
                     recv = smb.recv(b) #处理数据包
                     exploitCheck = (b"\x11\x03\x02\x00")
                     if recv[68:72] != exploitCheck: #判断是否存在\x11\x03\x02\x00数据
@@ -161,6 +163,8 @@ def main(IP):
         print("\033[33m[-]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT\033[0m")
     except socket.gaierror:
         print("\033[33m[-]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT\033[0m")
+    except socket.timeout:
+        print("\033[33m[-]CONNECTION THE SERVER TIMEOUT\033[0m")
 
 if __name__ == "__main__":
     mode()
