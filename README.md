@@ -1,4 +1,5 @@
 本脚本有蓝屏攻击, 随机IP攻击功能, 内网扫描
+SMBGhost_RCE_PoC文件夹的内容并非是我写的
 扫描内网的指令
 ./main.py local
 
