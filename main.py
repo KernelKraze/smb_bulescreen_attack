@@ -132,18 +132,18 @@ def main(IP):
     try:
         port=445 #将445数字定义为port变量
         with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as sock: #定义socket的.. AF_INET是使用ipv4的,SOCK_STREAM是使用TCP数据   
-            sock.settimeout(10)
+            sock.settimeout(5)
             scan = sock.connect_ex((IP,port)) #对445端口发送一个数据包,测试445端口是否开启，开启则返回0，没有开启则返回其他数
             if scan == 0: #如果打开则运行此行
                 print("[\033[32minfo\033[0m]IP %s --- PORT 445 OPEN/FILTRTED"% IP)
                 with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as smb:
-                    smb.settimeout(20)
+                    smb.settimeout(30)
                     try:
                         smb.connect((IP, port)) 
                     except:
                         smb.close()
                     smb.send(b'\x00\x00\x00\xc0\xfeSMB@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00$\x00\x08\x00\x01\x00\x00\x00\x7f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00x\x00\x00\x00\x02\x00\x00\x00\x02\x02\x10\x02"\x02$\x02\x00\x03\x02\x03\x10\x03\x11\x03\x00\x00\x00\x00\x01\x00&\x00\x00\x00\x00\x00\x01\x00 \x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\n\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00') #发送数据包,sendall函数是发送完整的tcp数据包与send函数类似
-                    b, = struct.unpack("!I", smb.recv(4)) #处理返回回来的2字节的二进制数据包 
+                    b, = struct.unpack(">I", smb.recv(4)) #处理返回回来的2字节的二进制数据包 
                     recv = smb.recv(b) #处理数据包
                     exploitCheck = (b"\x11\x03\x02\x00")
                     if recv[68:72] != exploitCheck: #判断是否存在\x11\x03\x02\x00数据
