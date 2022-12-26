@@ -1,4 +1,31 @@
 #!/usr/bin/python3
+
+#     _______    ________    ___   ____ ___   ____        ____  _________  _____    _____ __  _______  ________               __ 
+#    / ____/ |  / / ____/   |__ \ / __ \__ \ / __ \      / __ \/__  / __ \/ ___/   / ___//  |/  / __ )/ ____/ /_  ____  _____/ /_
+#   / /    | | / / __/________/ // / / /_/ // / / /_____/ / / /  / / /_/ / __ \    \__ \/ /|_/ / __  / / __/ __ \/ __ \/ ___/ __/
+#  / /___  | |/ / /__/_____/ __// /_/ / __// /_/ /_____/ /_/ /  / /\__, / /_/ /   ___/ / /  / / /_/ / /_/ / / / / /_/ (__  ) /_  
+#  \____/  |___/_____/    /____/\____/____/\____/      \____/  /_//____/\____/   /____/_/  /_/_____/\____/_/ /_/\____/____/\__/  
+#                                                                                                                              
+#
+#
+#
+#  ______________________________________________________________________________ 
+##|A remote code execution vulnerability exists in the                           | 
+##|   way that the Microsoft Server Message Block 3.1.1 (SMBv3) protocol         |
+##|   handles certain requests,                                                  |
+##!     aka 'Windows SMBv3 Client/Server Remote Code Execution Vulnerability'.   |
+##|                                                                              |
+##|This is based on the SMBGhost vulnerability script change,                    |
+##|       adding automated hacking.                                              |
+##|                                                                              |
+##| 2022-12-26 <My emal>testsendkfotesycike@gmail.com                            |
+##|      Marry Christmas!                                                        |
+##|                                     <rewritten by GeumBo>                    |
+##|                                     <Created by Radu-Emanuel Chiscariu>      |
+##|                                                                              |
+## ------------------------------------------------------------------------------
+##
+
 import socket #socket module, send and receive data
 from random import randint as rand #random module is used to generate a random number
 from time import sleep #time module is used to generate a random number
@@ -6,8 +33,8 @@ import struct #dec0de binary data
 import os #operation system module is used to get the operating system of the target machine
 import sys #sys module is used to get the operating system of the target machine
 from netaddr import IPNetwork #network address module is used to get the operating system of the target machine
-from smbprotocol.connection import Connection #smbprotocol module is used to get the operating system of the target machine
-from smbprotocol.session import Session #smbprotocol module is used to get the operating system of the target machine
+from /smbprotocol.connection import Connection #smbprotocol module is used to get the operating system of the target machine
+from /smbprotocol.session import Session #smbprotocol module is used to get the operating system of the target machine
 import uuid #uuid module is used to get the operating system of the target machine
 import re #re module is used to get the operating system of the target machine
 def showIP():
