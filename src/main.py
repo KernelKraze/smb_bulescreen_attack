@@ -37,38 +37,6 @@ from /smbprotocol.connection import Connection #smbprotocol module is used to ge
 from /smbprotocol.session import Session #smbprotocol module is used to get the operating system of the target machine
 import uuid #uuid module is used to get the operating system of the target machine
 import re #re module is used to get the operating system of the target machine
-def showIP():
-    packet = """
-GET /ip HTTP/1.1
-Host: ifconfig.me
-Connection: keep-alive
-Cache-Control: max-age=0
-Upgrade-Insecure-Requests: 1
-User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
-Accept-Encoding: gzip, deflate
-Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5
-
-GET /favicon.ico HTTP/1.1
-Host: ifconfig.me
-Connection: keep-alive
-Pragma: no-cache
-Cache-Control: no-cache
-User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36
-Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
-Referer: http://ifconfig.me/ip
-Accept-Encoding: gzip, deflate
-Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5"""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
-        sock.connect(("34.117.59.81",80))
-        sock.send(bytes(packet.encode()))
-        un, = struct.unpack("!H", sock.recv(2))
-        recv_ = sock.recv(un)
-        data = recv_.decode()
-        try:
-            return re.search(r"\d+\.\d+\.\d+\.\d+",data).group()
-        except:
-            return re.search(r"\d+\.\d+\.\d+\.\d+",data)
 
 def bule_screen(IP, username=None, password=None, port=445, encode=None, connectionTimeout=10):
     _SMB_CONNECTIONS = {}
@@ -100,8 +68,8 @@ def randomIP():
 def mode():
     try:
         SMBL = ("""\033[32m
-    |CVE-2020-0796 SMBGhost|    |your IP:%s|
-\033[0m"""%(showIP()))
+    |CVE-2020-0796 SMBGhost|
+\033[0m""")
         if len(sys.argv) == 1:
             print(SMBL)
             a = input("[\033[34minfo\033[0m]WHETHER TO ACTIVATE AUTOMATIC MODE? (y/n/exit)#")
